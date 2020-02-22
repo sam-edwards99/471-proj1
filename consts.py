@@ -1,0 +1,6 @@
+PAWN = 10
+ROOK = 50
+KNIGHT = 0
+BISHOP = 0
+KING = 0
+QUEEN = 0
