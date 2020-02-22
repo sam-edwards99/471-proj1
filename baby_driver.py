@@ -7,16 +7,9 @@
 
 # imports
 import chess
-<<<<<<< HEAD
-from eval_funcs import test_eval
-from eval_funcs import count_pieces
-#TODO(y'all): add any new evaluation functions
-=======
 import random
 #TODO(y'all): import any new evaluation functions on the line below
 from eval_funcs import test_eval, eval_countpieces, eval_weightpieces
->>>>>>> 3865bf0977067c8c0ab26649cc6676bc43fae2a6
-
 # minimax() runs an iteration of minimax-ab with the specified max depth
 # @param depth          set to the maximum depth we want to evaluate, decreases
 #                       over recursions until it reaches 0 at the bottom of the
