@@ -7,9 +7,15 @@
 
 # imports
 import chess
+<<<<<<< HEAD
 from eval_funcs import test_eval
 from eval_funcs import count_pieces
 #TODO(y'all): add any new evaluation functions
+=======
+import random
+#TODO(y'all): import any new evaluation functions on the line below
+from eval_funcs import test_eval, eval_countpieces, eval_weightpieces
+>>>>>>> 3865bf0977067c8c0ab26649cc6676bc43fae2a6
 
 # minimax() runs an iteration of minimax-ab with the specified max depth
 # @param depth          set to the maximum depth we want to evaluate, decreases
@@ -28,8 +34,13 @@ def minimax(depth, board, alpha, beta, is_maximizing, eval_func):
     if(depth == 0):
         return (-eval_func(board), board.peek())
 
-    # populate the possible moves with the current board state
-    possible_moves = board.legal_moves
+    # populate the possible moves that can be made from the current board state
+    possible_moves = []
+    # iterate through the generator because we can only shuffle a list
+    for move in board.legal_moves:
+        possible_moves.append(move)
+    # shuffle the order of the moves
+    random.shuffle(possible_moves)
 
     # if we're the maximizing player
     if(is_maximizing):
@@ -106,7 +117,7 @@ def play_game(white_eval, white_depth, black_eval, black_depth):
         # if it's black's turn
         else:
             # determine the best move to make via minimax-ab
-            best_pair = minimax(white_depth, board, float("-inf"), float("inf"), False, white_eval)
+            best_pair = minimax(black_depth, board, float("-inf"), float("inf"), False, black_eval)
             # make that move and pass the turn
             board.push(best_pair[1])
 
@@ -121,14 +132,14 @@ def play_game(white_eval, white_depth, black_eval, black_depth):
 # main() is the entry point
 def main():
     # play an example game
-    #result = play_game(test_eval, 4, test_eval, 4)
-    result2 = play_game(count_pieces, 4, test_eval, 4)
-    print(result2)
-    #print(result2)
+    results = []
+    for i in range(10):
+        results.append(play_game(eval_countpieces, 3, eval_weightpieces, 3))
+    print(results)
     #TODO(y'all):   Run some tests on a combination of evaluation complexity and
     #               search depth to determine what their effects are. You can
     #               run those games and collect those results here. An example
-    #               game is demonstrated above.
+    #               loop to run games is demonstrated above.
 
 # python is a dirty language and this is necessary
 if __name__ == "__main__":
