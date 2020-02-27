@@ -112,8 +112,31 @@ def eval_weightpieces(board):
     return score
 
 def thorough_eval(board):
-    piece_pts = eval_weightpieces(board)
+    score = 0
+    #the more pieces putting king in check, the better
+    score += len(board.checkers()) * 10
+    #the more moves available the better
+    score += board.legal_moves.count() * 0.1
+    #having 2 bishops is good
+    bishops = 0
+    for square in chess.SQUARES:
+        piece = board.piece_at(square)
+        if piece == None:
+            continue
+        if piece.symbol().lower() == 'b':
+            bishops += 1
+        #if piece.symbol().lower() == "k" and piece.color and square/8 == 1:
 
+        piece_pts = piece_to_pts(piece)
+        dist_weight = 1 - linear_dist((square % 8, square / 8), (4.5, 4.5)) / 5
+        if piece.color:
+            score += piece_pts * dist_weight
+        else:
+            score -= piece_pts * dist_weight
+        # having 2 bishops is good
+        if bishops == 2:
+            score += 2
+    return score
 
 
 # TODO(y'all):  implement one more evaluation function, more-thorough than just

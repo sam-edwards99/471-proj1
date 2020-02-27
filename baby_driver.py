@@ -9,7 +9,7 @@
 import chess
 import random
 #TODO(y'all): import any new evaluation functions on the line below
-from eval_funcs import test_eval, thorough_eval, eval_countpieces, eval_weightpieces
+from eval_funcs import thorough_eval, eval_countpieces, eval_weightpieces
 # minimax() runs an iteration of minimax-ab with the specified max depth
 # @param depth          set to the maximum depth we want to evaluate, decreases
 #                       over recursions until it reaches 0 at the bottom of the
@@ -112,7 +112,7 @@ def play_game(white_eval, white_depth, black_eval, black_depth):
             board.push(best_pair[1])
 
         # if it's black's turn
-        else::
+        else:
             # determine the best move to make via minimax-ab
             best_pair = minimax(black_depth, board, float("-inf"), float("inf"), False, black_eval)
             # make that move and pass the turn
@@ -130,8 +130,8 @@ def play_game(white_eval, white_depth, black_eval, black_depth):
 def main():
     # play an example game
     results = []
-    for i in range(10):
-        results.append(play_game(eval_countpieces, 3, eval_weightpieces, 3))
+    for i in range(3):
+        results.append(play_game(eval_countpieces, 3, thorough_eval, 3))
     print(results)
     #TODO(y'all):   Run some tests on a combination of evaluation complexity and
     #               search depth to determine what their effects are. You can
