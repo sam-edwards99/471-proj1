@@ -9,7 +9,7 @@
 import chess
 import random
 #TODO(y'all): import any new evaluation functions on the line below
-from eval_funcs import test_eval, eval_countpieces, eval_weightpieces
+from eval_funcs import test_eval, thorough_eval, eval_countpieces, eval_weightpieces
 # minimax() runs an iteration of minimax-ab with the specified max depth
 # @param depth          set to the maximum depth we want to evaluate, decreases
 #                       over recursions until it reaches 0 at the bottom of the

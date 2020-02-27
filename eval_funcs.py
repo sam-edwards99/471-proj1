@@ -20,27 +20,6 @@ import consts
 def test_eval(board):
     return random.seed(datetime.now()).uniform(-100, 100)
 
-def count_pieces(board):
-    total = 0
-    points = {1: 1,  #pawn = 1 point
-              2: 3,  #knight = 3 points
-              3: 3,  #bishop = 3 points
-              4: 5,  #rook = 4 points
-              5: 9,  #queen = 9 points
-              6: 100 #king = priceless
-              }
-    for square in chess.SQUARES:
-        if board.piece_at(square) is not None:
-            value = points.get(board.piece_at(square).piece_type)
-            # if piece = white
-            if board.piece_at(square).color is True:
-                total += value
-            # if piece = black
-            if board.piece_at(square).color is False:
-                total -= value
-    #print(total)
-    return total
-
 # piece_to_pts() returns a point evaluation for a given python-chess piece.
 # @param piece  a python-chess piece object of the piece to be evaluated.
 #               NOTE: Cannot be None or it'll break. Catch those elsewhere.
@@ -131,6 +110,11 @@ def eval_weightpieces(board):
             score -= piece_pts * dist_weight
     # return the final score
     return score
+
+def thorough_eval(board):
+    piece_pts = eval_weightpieces(board)
+
+
 
 # TODO(y'all):  implement one more evaluation function, more-thorough than just
 #               counting pieces and/or weighting their positions like in the
