@@ -108,7 +108,7 @@ def play_game(white_eval, white_depth, black_eval, black_depth):
             board.push(best_pair[1])
 
         # if it's black's turn
-        else:
+        else::
             # determine the best move to make via minimax-ab
             best_pair = minimax(black_depth, board, float("-inf"), float("inf"), False, black_eval)
             # make that move and pass the turn
