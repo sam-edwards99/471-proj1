@@ -131,7 +131,7 @@ def main():
     # play an example game
     results = []
     for i in range(10):
-        results.append(play_game(eval_countpieces, 3, thorough_eval, 3))
+        results.append(play_game(eval_weightpieces, 3, thorough_eval, 3))
     print(results)
     #TODO(y'all):   Run some tests on a combination of evaluation complexity and
     #               search depth to determine what their effects are. You can

@@ -114,9 +114,9 @@ def eval_weightpieces(board):
 def thorough_eval(board):
     score = 0
     #the more pieces putting king in check, the better
-    score += len(board.checkers()) * 10
+    score += len(board.checkers())
     #the more moves available the better
-    score += board.legal_moves.count() * 0.2
+    score += board.legal_moves.count() * 0.1
     #having 2 bishops is good
     bishops = 0
     for square in chess.SQUARES:
