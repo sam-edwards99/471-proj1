@@ -111,22 +111,46 @@ def eval_weightpieces(board):
     # return the final score
     return score
 
+# count pieces in front of the king
+def count_surrounding_friendlies(square, board):
+    protectors = 0
+    squares = [square + 7, square + 8, square + 9]
+    for i in range(3):
+        try:
+            if board.piece_at(squares[i]) is not None and board.piece_at(squares[i]).color:
+                protectors += 1
+        except:
+            break
+    return protectors * 0.5
+
+def pawn_promotion(square):
+    index = square / 8
+    dist_weight = (1 - linear_dist((8, index), (square % 8, index))) / 8
+    return dist_weight
+
 def thorough_eval(board):
     score = 0
     #the more pieces putting king in check, the better
-    score += len(board.checkers()) * 10
+    score += len(board.checkers())
     #the more moves available the better
-    score += board.legal_moves.count() * 0.2
+    score += board.legal_moves.count() * 0.02
     #having 2 bishops is good
     bishops = 0
+    enemy_bishops = 0
+    #protect the king (w pawns)?
     for square in chess.SQUARES:
         piece = board.piece_at(square)
         if piece == None:
-            continue
-        if piece.symbol().lower() == 'b':
-            bishops += 1
-        #if piece.symbol().lower() == "k" and piece.color and square/8 == 1:
-
+             continue
+        # if piece.symbol().lower() == 'b' and piece.color:
+        #     bishops += 1
+        # elif piece.symbol().lower() == 'b' and not piece.color:
+        #     enemy_bishops += 1
+        # #elif piece.symbol().lower() == 'q' and piece.color:
+        # #    score += 5
+        # elif (piece.symbol().lower() == 'k' and piece.color):
+        #     protectors = count_surrounding_friendlies(square, board)
+        #     score += protectors
         piece_pts = piece_to_pts(piece)
         dist_weight = 1 - linear_dist((square % 8, square / 8), (4.5, 4.5)) / 5
         if piece.color:
@@ -134,11 +158,7 @@ def thorough_eval(board):
         else:
             score -= piece_pts * dist_weight
         # having 2 bishops is good
-        if bishops == 2:
-            score += 2
+        # if bishops == 2 and enemy_bishops < 2:
+        #     score += 1
     return score
 
-
-# TODO(y'all):  implement one more evaluation function, more-thorough than just
-#               counting pieces and/or weighting their positions like in the
-#               above examples.
