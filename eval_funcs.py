@@ -103,6 +103,7 @@ def eval_weightpieces(board):
         #       y-coord of a square.
         # NOTE: we divide by 5 because that's the max distance from the middle
         dist_weight = 1 - linear_dist((square % 8, square / 8), (4.5, 4.5)) / 5
+        dist_weight *= 2
         # if the piece is a white piece, add its value. Otherwise, subtract it.
         if piece.color:
             score += piece_pts * dist_weight
@@ -111,31 +112,81 @@ def eval_weightpieces(board):
     # return the final score
     return score
 
-def thorough_eval(board):
-    score = 0
-    #the more pieces putting king in check, the better
-    score += len(board.checkers())
-    #the more moves available the better
-    score += board.legal_moves.count() * 0.1
-    #having 2 bishops is good
-    bishops = 0
+def count_checkers(board):
+    points_per_checker = 3
+    board.checkers()
+
+def protect_king(board):
+    point_per_protector = 1
+    protectors = 0
     for square in chess.SQUARES:
         piece = board.piece_at(square)
         if piece == None:
             continue
-        if piece.symbol().lower() == 'b':
-            bishops += 1
-        #if piece.symbol().lower() == "k" and piece.color and square/8 == 1:
+        if piece.symbol().lower() == 'k' and piece.color:
+            squares = [square + 7, square + 8, square + 9]
+            for i in range(3):
+                #try:
+                if board.piece_at(squares[i]) is not None and board.piece_at(squares[i]).color:
+                    protectors += 1
+                #except:
+                    #break
+        elif piece.symbol().lower() == 'k' and not piece.color:
+            squares = [square - 7, square - 8, square - 9]
+            for i in range(3):
+                # try:
+                if board.piece_at(squares[i]) is not None and not board.piece_at(squares[i]).color:
+                    protectors -= 1
+                #except:
+                    #break
+    return protectors * point_per_protector
 
-        piece_pts = piece_to_pts(piece)
-        dist_weight = 1 - linear_dist((square % 8, square / 8), (4.5, 4.5)) / 5
-        if piece.color:
-            score += piece_pts * dist_weight
-        else:
-            score -= piece_pts * dist_weight
-        # having 2 bishops is good
-        if bishops == 2:
-            score += 2
+def bishop_pair(board):
+    points_per_pair = 1
+    white_bishops = 0
+    black_bishops = 0
+    for square in chess.SQUARES:
+        piece = board.piece_at(square)
+        if piece == None:
+            continue
+        if piece.symbol().lower() == 'b' and piece.color:
+            white_bishops += 1
+        elif piece.symbol().lower() == 'b' and not piece.color:
+            black_bishops += 1
+    if white_bishops == 2 and black_bishops < 2:
+        return points_per_pair
+    elif black_bishops == 2 and white_bishops > 2:
+        return -points_per_pair
+    else:
+        return 0
+
+def pawn_promotion(board):
+    promotion_dist_weight = 1
+    promotion_total = 0
+    for square in chess.SQUARES:
+        piece = board.piece_at(square)
+        if piece == None:
+            continue
+        if piece.symbol().lower() == 'p' and piece.color:
+            rank = square / 8
+            promotion_total += (1 - ((8 - rank) / 8)) * promotion_dist_weight
+        elif piece.symbol().lower() == 'p' and not piece.color:
+            rank = square / 8
+            promotion_total -= -(1 - (rank / 8)) * promotion_dist_weight
+    return promotion_total
+
+def get_possible_moves(board):
+    points_per_move = 0.02
+    return points_per_move * board.legal_moves.count()
+
+
+def thorough_eval(board):
+    score = 0
+    score += eval_weightpieces(board)
+    score += protect_king(board)
+    score += pawn_promotion(board)
+    score += get_possible_moves(board)
+    score += count_checkers(board)
     return score
 
 

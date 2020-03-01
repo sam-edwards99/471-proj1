@@ -9,7 +9,7 @@
 import chess
 import random
 #TODO(y'all): import any new evaluation functions on the line below
-from eval_funcs import thorough_eval, eval_countpieces, eval_weightpieces
+from eval_funcs import *
 # minimax() runs an iteration of minimax-ab with the specified max depth
 # @param depth          set to the maximum depth we want to evaluate, decreases
 #                       over recursions until it reaches 0 at the bottom of the
@@ -26,7 +26,7 @@ def minimax(depth, board, alpha, beta, is_maximizing, eval_func):
     # end the recursion if this is the maximum depth we want to reach
     if depth == 0:
         if board.result() == "1-0":
-            return float("inf", board.peek())
+            return (float("inf"), board.peek())
         if board.result() == "0-1":
             return (float("-inf"), board.peek)
         return (-eval_func(board), board.peek())
@@ -110,17 +110,28 @@ def play_game(white_eval, white_depth, black_eval, black_depth):
             best_pair = minimax(white_depth, board, float("inf"), float("-inf"), True, white_eval)
             # make that move and pass the turn
             board.push(best_pair[1])
-
+            #PRINT
+            print("w score: ", white_eval(board))
+            print("king protection: ", protect_king(board))
+            print("bishop pair adv: ", bishop_pair(board))
+            print("pawn score: ", pawn_promotion(board))
+            print("----------------")
         # if it's black's turn
         else:
             # determine the best move to make via minimax-ab
             best_pair = minimax(black_depth, board, float("-inf"), float("inf"), False, black_eval)
             # make that move and pass the turn
             board.push(best_pair[1])
-
+            #PRINT
+            print("b score: ", black_eval(board))
+            print("king protection: ", -protect_king(board))
+            print("bishop pair adv: ", -bishop_pair(board))
+            print("pawn score: ", -pawn_promotion(board))
+            print("----------------")
         # print the board at the end of each turn
         print(board)
         print("----------------")
+        # if white just moved, now its blacks turn so display white scores
 
     # print the final board state and return the result of the game
     print(board)
@@ -131,7 +142,7 @@ def main():
     # play an example game
     results = []
     for i in range(10):
-        results.append(play_game(eval_weightpieces, 3, thorough_eval, 3))
+        results.append(play_game(eval_weightpieces, 4, thorough_eval, 4))
     print(results)
     #TODO(y'all):   Run some tests on a combination of evaluation complexity and
     #               search depth to determine what their effects are. You can
