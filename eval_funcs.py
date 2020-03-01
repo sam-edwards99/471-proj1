@@ -113,12 +113,21 @@ def eval_weightpieces(board):
     return score
 
 def count_checkers(board):
-    points_per_checker = 3
-    board.checkers()
+    points_per_checker = 2
+    checkers = board.checkers()
+    #the more pieces we have checking opponent the better
+    if len(checkers) == 0:
+        return 0
+    #the more pieces opponent has checking us the worse
+    elif board.piece_at(checkers.pop()).color:
+        return (len(checkers) + 1) * points_per_checker
+    else:
+        return (-len(checkers) - 1) * points_per_checker
 
 def protect_king(board):
     point_per_protector = 1
     protectors = 0
+    #it is desirable to have friendly pieces ahead of your king
     for square in chess.SQUARES:
         piece = board.piece_at(square)
         if piece == None:
@@ -126,19 +135,19 @@ def protect_king(board):
         if piece.symbol().lower() == 'k' and piece.color:
             squares = [square + 7, square + 8, square + 9]
             for i in range(3):
-                #try:
-                if board.piece_at(squares[i]) is not None and board.piece_at(squares[i]).color:
-                    protectors += 1
-                #except:
-                    #break
+                try:
+                    if board.piece_at(squares[i]) is not None and board.piece_at(squares[i]).color:
+                        protectors += 1
+                except:
+                    break
         elif piece.symbol().lower() == 'k' and not piece.color:
             squares = [square - 7, square - 8, square - 9]
             for i in range(3):
-                # try:
-                if board.piece_at(squares[i]) is not None and not board.piece_at(squares[i]).color:
-                    protectors -= 1
-                #except:
-                    #break
+                try:
+                    if board.piece_at(squares[i]) is not None and not board.piece_at(squares[i]).color:
+                        protectors -= 1
+                except:
+                    break
     return protectors * point_per_protector
 
 def bishop_pair(board):
@@ -153,8 +162,10 @@ def bishop_pair(board):
             white_bishops += 1
         elif piece.symbol().lower() == 'b' and not piece.color:
             black_bishops += 1
+    # if we have a pair of bishops and opponent doesn't, thats good
     if white_bishops == 2 and black_bishops < 2:
         return points_per_pair
+    # if opponent has a pair of bishops and we don't, thats bad
     elif black_bishops == 2 and white_bishops > 2:
         return -points_per_pair
     else:
@@ -167,9 +178,11 @@ def pawn_promotion(board):
         piece = board.piece_at(square)
         if piece == None:
             continue
+        #we want our pieces to reach the opposite side
         if piece.symbol().lower() == 'p' and piece.color:
             rank = square / 8
             promotion_total += (1 - ((8 - rank) / 8)) * promotion_dist_weight
+        #we dont want enemy pieces to reach our side
         elif piece.symbol().lower() == 'p' and not piece.color:
             rank = square / 8
             promotion_total -= -(1 - (rank / 8)) * promotion_dist_weight
@@ -177,8 +190,23 @@ def pawn_promotion(board):
 
 def get_possible_moves(board):
     points_per_move = 0.02
+    #we want to open up the board with more possible moves
     return points_per_move * board.legal_moves.count()
 
+def has_castled(board):
+    castling_points = 2
+    total = 0
+    #if white hasn't castled, thats bad, we want to castle
+    if bool(board.castling_rights & chess.BB_A1) and bool(board.castling_rights & chess.BB_A8):
+        total -= castling_points
+    else:
+        total += castling_points
+    #if black hasn't castled, thats good, we dont want them to castle
+    if bool(board.castling_rights & chess.BB_H1) and bool(board.castling_rights & chess.BB_H8):
+        total += castling_points
+    else:
+        total -= castling_points
+    return total
 
 def thorough_eval(board):
     score = 0
@@ -187,9 +215,6 @@ def thorough_eval(board):
     score += pawn_promotion(board)
     score += get_possible_moves(board)
     score += count_checkers(board)
+    score += has_castled(board)
     return score
 
-
-# TODO(y'all):  implement one more evaluation function, more-thorough than just
-#               counting pieces and/or weighting their positions like in the
-#               above examples.

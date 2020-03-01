@@ -115,6 +115,8 @@ def play_game(white_eval, white_depth, black_eval, black_depth):
             print("king protection: ", protect_king(board))
             print("bishop pair adv: ", bishop_pair(board))
             print("pawn score: ", pawn_promotion(board))
+            print("checkers: ", count_checkers(board))
+
             print("----------------")
         # if it's black's turn
         else:
@@ -127,6 +129,7 @@ def play_game(white_eval, white_depth, black_eval, black_depth):
             print("king protection: ", -protect_king(board))
             print("bishop pair adv: ", -bishop_pair(board))
             print("pawn score: ", -pawn_promotion(board))
+            print("checkers: ", -count_checkers(board))
             print("----------------")
         # print the board at the end of each turn
         print(board)
