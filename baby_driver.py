@@ -144,9 +144,21 @@ def play_game(white_eval, white_depth, black_eval, black_depth):
 def main():
     # play an example game
     results = []
-    for i in range(10):
-        results.append(play_game(eval_weightpieces, 4, thorough_eval, 4))
+    for i in range(20):
+        results.append(play_game(eval_weightpieces, 6, thorough_eval, 6))
     print(results)
+    white_wins = 0
+    black_wins = 0
+    for i in range(len(results)):
+        try:
+            white_score = int(results[i].split('-')[0], 10)
+            black_score = int(results[i].split('-')[1], 10)
+        except:
+            white_score = 0.5
+            black_score = 0.5
+        white_wins += white_score
+        black_wins += black_score
+    print("Computer - ", white_wins, " Sam - ", black_wins)
     #TODO(y'all):   Run some tests on a combination of evaluation complexity and
     #               search depth to determine what their effects are. You can
     #               run those games and collect those results here. An example
