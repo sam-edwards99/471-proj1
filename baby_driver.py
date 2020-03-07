@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # file:     baby_driver.py
-# author:   <your_umbc_email_here>
+# author:   nevitt1@umbc.edu
 # date:     02/02/2020
 # desc:     python3 minmax-ab implementation for use with chess eval functions,
 #           CMSC471 project 1.
@@ -8,7 +8,6 @@
 # imports
 import chess
 import random
-#TODO(y'all): import any new evaluation functions on the line below
 from eval_funcs import *
 # minimax() runs an iteration of minimax-ab with the specified max depth
 # @param depth          set to the maximum depth we want to evaluate, decreases
@@ -110,43 +109,50 @@ def play_game(white_eval, white_depth, black_eval, black_depth):
             best_pair = minimax(white_depth, board, float("inf"), float("-inf"), True, white_eval)
             # make that move and pass the turn
             board.push(best_pair[1])
-            #PRINT
-            print("w score: ", white_eval(board))
-            print("king protection: ", protect_king(board))
-            print("bishop pair adv: ", bishop_pair(board))
-            print("pawn score: ", pawn_promotion(board))
-            print("checkers: ", count_checkers(board))
-
-            print("----------------")
         # if it's black's turn
         else:
             # determine the best move to make via minimax-ab
             best_pair = minimax(black_depth, board, float("-inf"), float("inf"), False, black_eval)
             # make that move and pass the turn
             board.push(best_pair[1])
-            #PRINT
-            print("b score: ", black_eval(board))
-            print("king protection: ", -protect_king(board))
-            print("bishop pair adv: ", -bishop_pair(board))
-            print("pawn score: ", -pawn_promotion(board))
-            print("checkers: ", -count_checkers(board))
-            print("----------------")
         # print the board at the end of each turn
-        print(board)
-        print("----------------")
-        # if white just moved, now its blacks turn so display white scores
-
+        # print(board)
+        # print("----------------")
     # print the final board state and return the result of the game
-    print(board)
+    # print(board)
     return board.result()
 
 # main() is the entry point
 def main():
-    # play an example game
-    results = []
-    for i in range(20):
-        results.append(play_game(eval_weightpieces, 6, thorough_eval, 6))
-    print(results)
+    #code for generating all variations
+    output = open('output.csv', 'w')
+    depths = [2,4,6]
+    functs = [eval_countpieces, eval_weightpieces, thorough_eval]
+    combos = []
+    # generate all 9 combinations
+    for i in range(3):
+        for j in range(3):
+            pair = (depths[i], functs[j])
+            combos.append(pair)
+
+    for k in range(len(combos)):
+        #generate all matchups
+        for l in range(1,len(combos)):
+            print(str('combination: ' + str(k) + ' vs combination: '
+                 + str((k + l) % len(combos)) + '\n' + 'results: '))
+
+            output.write(str('combination: '+ str(k) + ' vs combination: '
+                        + str((k+l)%len(combos)) + '\n' + 'results: '))
+            # each matchup plays 2 games twice (4 total)
+            results = []
+            for m in range(2):
+                results.append(play_game(combos[k][1], combos[k][0],
+                combos[(k+l) % len(combos)][1], combos[(k+l) % len(combos)][0]))
+            output.write(tally_score(results) + ',\n')
+            print(tally_score(results) + ',\n')
+
+#gives result string based on a series of games
+def tally_score(results):
     white_wins = 0
     black_wins = 0
     for i in range(len(results)):
@@ -158,11 +164,7 @@ def main():
             black_score = 0.5
         white_wins += white_score
         black_wins += black_score
-    print("Computer - ", white_wins, " Sam - ", black_wins)
-    #TODO(y'all):   Run some tests on a combination of evaluation complexity and
-    #               search depth to determine what their effects are. You can
-    #               run those games and collect those results here. An example
-    #               loop to run games is demonstrated above.
+    return str(white_wins) + ' - ' + str(black_wins)
 
 # python is a dirty language and this is necessary
 if __name__ == "__main__":

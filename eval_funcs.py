@@ -1,5 +1,5 @@
 # file:     eval_funcs.py
-# author:   <your_umbc_email_here>
+# author:   nevitt1@umbc.edu
 # date:     02/20/2020
 # desc:     Evaluation functions for a chess board, used to drive minimax-ab.
 
@@ -8,7 +8,6 @@ import chess
 import math
 import random
 from datetime import datetime
-import consts
 
 # test_eval() returns a random board evaluation in [-10, 10]
 # @param board  a python-chess board object containing the current board state
@@ -106,50 +105,58 @@ def eval_weightpieces(board):
         dist_weight *= 2
         # if the piece is a white piece, add its value. Otherwise, subtract it.
         if piece.color:
-            score += piece_pts * dist_weight
+            score += math.fabs(piece_pts * dist_weight)
         else:
-            score -= piece_pts * dist_weight
+            score -= math.fabs(piece_pts * dist_weight)
+
     # return the final score
     return score
 
+# gives a score based on the number of pieces placing king in check
 def count_checkers(board):
-    points_per_checker = 2
+    points_per_checker = 0.6
     checkers = board.checkers()
-    #the more pieces we have checking opponent the better
     if len(checkers) == 0:
         return 0
-    #the more pieces opponent has checking us the worse
+    #the more pieces we have checking opponent the better
     elif board.piece_at(checkers.pop()).color:
         return (len(checkers) + 1) * points_per_checker
+    # the more pieces opponent has checking us the worse
     else:
-        return (-len(checkers) - 1) * points_per_checker
+        return (-(len(checkers) + 1)) * points_per_checker
 
+# gives a score based on the number of friendly pieces in front of king
 def protect_king(board):
-    point_per_protector = 1
-    protectors = 0
+    point_per_protector = 0.4
+    protection = 0
     #it is desirable to have friendly pieces ahead of your king
     for square in chess.SQUARES:
         piece = board.piece_at(square)
         if piece == None:
             continue
         if piece.symbol().lower() == 'k' and piece.color:
+            #counts friendly pieces in 3 squares ahead of king in next rank
             squares = [square + 7, square + 8, square + 9]
             for i in range(3):
+                #cover out of bounds cases
                 try:
                     if board.piece_at(squares[i]) is not None and board.piece_at(squares[i]).color:
-                        protectors += 1
+                        protection += 1
                 except:
                     break
         elif piece.symbol().lower() == 'k' and not piece.color:
             squares = [square - 7, square - 8, square - 9]
+            if square/8 == 7 or square/8 == 8:
+                protection -= 3
             for i in range(3):
                 try:
                     if board.piece_at(squares[i]) is not None and not board.piece_at(squares[i]).color:
-                        protectors -= 1
+                        protection -= 1
                 except:
                     break
-    return protectors * point_per_protector
+    return protection * point_per_protector
 
+# gives a score based on whether one side has a pair of bishops and another does not
 def bishop_pair(board):
     points_per_pair = 1
     white_bishops = 0
@@ -171,8 +178,9 @@ def bishop_pair(board):
     else:
         return 0
 
+# gives a score based on the proximity of pawns to reaching promotion
 def pawn_promotion(board):
-    promotion_dist_weight = 1
+    promotion_dist_weight = 0.05
     promotion_total = 0
     for square in chess.SQUARES:
         piece = board.piece_at(square)
@@ -185,16 +193,18 @@ def pawn_promotion(board):
         #we dont want enemy pieces to reach our side
         elif piece.symbol().lower() == 'p' and not piece.color:
             rank = square / 8
-            promotion_total -= -(1 - (rank / 8)) * promotion_dist_weight
+            promotion_total -= (1 - (rank / 8)) * promotion_dist_weight
     return promotion_total
 
+# gives score based on how free the board is based on available legal moves
 def get_possible_moves(board):
-    points_per_move = 0.02
+    points_per_move = 0.04
     #we want to open up the board with more possible moves
     return points_per_move * board.legal_moves.count()
 
+# gives a bonus score based on whether of not the player has castled
 def has_castled(board):
-    castling_points = 2
+    castling_points = 0.4
     total = 0
     #if white hasn't castled, thats bad, we want to castle
     if bool(board.castling_rights & chess.BB_A1) and bool(board.castling_rights & chess.BB_A8):
@@ -208,6 +218,7 @@ def has_castled(board):
         total -= castling_points
     return total
 
+# gives a score based on a combination of the above helper functions
 def thorough_eval(board):
     score = 0
     score += eval_weightpieces(board)
